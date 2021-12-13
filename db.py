@@ -20,11 +20,13 @@ class BotDB:
         """Добавляем юзера в базу"""
         self.cursor.execute("INSERT INTO `users` (`user_id`) VALUES (?)", (user_id,))
         return self.conn.commit()
+    def get_count(self, user_id):
+        self.cursor.execute("select count(*) from `users`")
+        return self.cursor.fetchone()
 
     def add_record(self, user_id, value):
         """Создаем запись о доходах/расходах"""
-        self.cursor.execute("INSERT INTO `records` (`users_id`, `value`) VALUES (?,?)",
-            (self.get_user_id(user_id), value))
+        self.cursor.execute("INSERT INTO `records` (`users_id`, `value`) VALUES (?,?)", (self.get_user_id(user_id), value))
         return self.conn.commit()
 
     def get_records(self, user_id, within = "all"):

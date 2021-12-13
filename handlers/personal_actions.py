@@ -3,6 +3,7 @@ from dispatcher import dp
 import re
 from bot import BotDB, ver
 from draw_table import draw_function
+from config import admin_id
 from PIL import Image, ImageDraw
 global markup, markup_mood
 count = 0
@@ -14,6 +15,14 @@ item1 = types.KeyboardButton("➕ Добавить запись")
 item2 = types.KeyboardButton("📊  Статистика")
 item3 = types.KeyboardButton("⚙️Настройки")
 markup.add(item1, item2, item3)
+
+# -.-.-.-.-.-.-.-.-.-.-.-.- Таблица админа -.-.-.-.-.-.-.-.-.-.-.-.-
+
+markup_admin = types.ReplyKeyboardMarkup(resize_keyboard=True)
+item1 = types.KeyboardButton("Отправить всем сообщение")
+item2 = types.KeyboardButton("Кол-во пользователей")
+item3 = types.KeyboardButton("Еще не придумал")
+markup_admin.add(item1, item2, item3)
 
 # -.-.-.-.-.-.-.-.-.-.-.-.- Таблица выбора настроения -.-.-.-.-.-.-.-.-.-.-.-.-
 
@@ -190,6 +199,19 @@ async def echo_message(message: types.Message):
         await message.bot.send_message(message.from_user.id, "Люблю тебя, Поля!", reply_markup=markup)
         await message.answer_sticker(r'CAACAgIAAxkBAAEDZmVhqMklwbAWpOwq6Ia9PVS6nJbM7wACFwMAAladvQrnhi7ExlTFGyIE')
         count = 0
+    elif msg == "/admin":
+        if int(message.from_user.id) == admin_id:
+            await message.bot.send_message(message.from_user.id, "Привет админ!", reply_markup=markup_admin)
+            count = 5
+        else:
+            await message.bot.send_message(message.from_user.id, "Вы не админ, извините!", reply_markup=markup)
+            count = 0
+    elif msg == "Кол-во пользователей":
+        if count == 5:
+            count_users = BotDB.get_count(message.from_user.id)
+            count_text = "Количество пользователей - " + str(count_users[0])
+            await message.bot.send_message(message.from_user.id, count_text, reply_markup=markup_admin)
+            count = 0
     else:
         try:
             await message.bot.send_message(message.from_user.id, "Ошибка", reply_markup=markup)
