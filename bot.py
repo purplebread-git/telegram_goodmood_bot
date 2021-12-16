@@ -10,4 +10,4 @@ ver = 1.2
 BotDB = BotDB('mood_bot.db')
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True)
-print('Version bot - ',ver)
+print('Version bot - ', ver)

@@ -72,7 +72,10 @@ markup_settings.add(item1, item2, item3, item4)
 @dp.callback_query_handler(text='podpisk')
 async def check_podpisk(call: types.CallbackQuery):
     user_status = await call.bot.get_chat_member(chat_id=kanal_id, user_id=call.from_user.id)
+    msg_id = call['message']
+    print(msg_id['message_id'])
     if user_status['status'] != 'left':
+        await call.bot.delete_message(call.from_user.id, int(msg_id['message_id']))
         await call.bot.send_message(call.from_user.id, "Вы успешно подписались на канал, спасибо!", reply_markup=markup)
     else:
         await call.bot.send_message(call.from_user.id, "Извините, но Вы не подписались на канал", reply_markup=markup_podpisk)
@@ -84,7 +87,7 @@ async def check_podpisk(call: types.CallbackQuery):
 async def start(message: types.Message):
     if not BotDB.user_exists(message.from_user.id):
         BotDB.add_user(message.from_user.id)
-
+    await message.bot.delete_message(message.from_user.id, int(message['message_id']))
     await message.bot.send_message(message.from_user.id, "Добро пожаловать!")
     msg_kan = 'Для использования бота, пожалуйста, подпишитесь на канал' + '\n\n' + 'https://t.me/goodmood_kanal'
     await message.bot.send_message(message.from_user.id, msg_kan, reply_markup=markup_podpisk)
@@ -95,6 +98,7 @@ async def start(message: types.Message):
 async def echo_message(message: types.Message):
     global count
     print('count_1 = ', count)
+    print(message)
     msg = message['text']
     print(msg)
 
@@ -105,6 +109,7 @@ async def echo_message(message: types.Message):
         if msg == "➕ Добавить запись":
             await message.bot.send_message(message.from_user.id, "Выберите Ваше <b>настроение</b> <u>сейчас</u>!",
                                            reply_markup=markup_mood)
+            await message.bot.delete_message(message.from_user.id, int(message['message_id']))
             count = 1
         elif count == 1:
             if msg == " 😀 ":
@@ -146,10 +151,11 @@ async def echo_message(message: types.Message):
             elif msg == "🔙 Назад":
                 await message.bot.send_message(message.from_user.id, "🔙 Возвращаемся в главное меню", reply_markup=markup)
                 count = 0
-
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
         elif msg == "📊  Статистика":
             try:
-                await message.bot.send_message(message.from_user.id, "Статистика", reply_markup=markup_statistic)
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
+                await message.bot.send_message(message.from_user.id, "📊  Статистика", reply_markup=markup_statistic)
             except:
                 print('Ошибка')
 
