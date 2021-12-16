@@ -11,6 +11,11 @@ class BotDB:
         result = self.cursor.execute("SELECT `id` FROM `users` WHERE `user_id` = ?", (user_id,))
         return bool(len(result.fetchall()))
 
+    def get_count(self):
+        ''' Количество пользователей'''
+        self.cursor.execute("select count(*) from `users`")
+        return self.cursor.fetchone()
+
     def get_user_id(self, user_id):
         """Достаем id юзера в базе по его user_id"""
         result = self.cursor.execute("SELECT `id` FROM `users` WHERE `user_id` = ?", (user_id,))
