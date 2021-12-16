@@ -19,7 +19,7 @@ from PIL import Image, ImageDraw
 
 
 
-def draw_function(form, mood):
+def draw_function(form, mood, id):
     record_mood = []
     record_day = []
     if form == 'week':
@@ -74,7 +74,7 @@ def draw_function(form, mood):
             for l in range(0, len(a)):
                 if l<len(a)-1:
                     draw.line((a[l], b[l], a[l+1], b[l+1]), fill=(0, 0, 0), width=4)
-
-    new_image.save('pic.png', "PNG")
+    name_pic = 'pic_'+str(id)+'.png'
+    new_image.save(name_pic, "PNG")
 
 

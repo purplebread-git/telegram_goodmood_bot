@@ -5,11 +5,10 @@ from bot import BotDB, ver
 from draw_table import draw_function
 from config import admin_id, kanal_id, polya_id
 from PIL import Image, ImageDraw
+import os
 global markup, markup_mood
 count = 0
 global user_status
-
-
 
 # -.-.-.-.-.-.-.-.-.-.-.-.- Таблица меню -.-.-.-.-.-.-.-.-.-.-.-.-
 
@@ -45,6 +44,12 @@ item1 = types.InlineKeyboardButton("Подписаться", callback_data='link
 item2 = types.InlineKeyboardButton("✅ Я подписался", callback_data='podpisk')
 markup_podpisk.add(item1, item2)
 
+# -.-.-.-.-.-.-.-.-.-.-.-.- Таблица хз как назвать -.-.-.-.-.-.-.-.-.-.-.-.-
+
+markup_start = types.InlineKeyboardMarkup(resize_keyboard=True)
+item1 = types.InlineKeyboardButton("✅ Я подписался", callback_data='ready')
+markup_start.add(item1)
+
 # -.-.-.-.-.-.-.-.-.-.-.-.- Таблица статистики -.-.-.-.-.-.-.-.-.-.-.-.-
 
 
@@ -56,7 +61,6 @@ item4 = types.KeyboardButton("📁 Экспорт XML")
 item5 = types.KeyboardButton("🔙 Назад")
 markup_statistic.add(item1, item2, item3, item4, item5)
 
-
 # -.-.-.-.-.-.-.-.-.-.-.-.- Таблица настроек -.-.-.-.-.-.-.-.-.-.-.-.-
 
 
@@ -67,18 +71,36 @@ item3 = types.KeyboardButton("🤖 О боте")
 item4 = types.KeyboardButton("🔙 Назад")
 markup_settings.add(item1, item2, item3, item4)
 
+
 # -.-.-.-.-.-.-.-.-.-.-.-.- -.-.-.-.-.-.-.-.-.-.-.-.-
+@dp.callback_query_handler(text='ready')
+async def ready_start(call: types.CallbackQuery):
+    msg_id = call['message']
+    await call.bot.delete_message(call.from_user.id, int(msg_id['message_id']))
+
+
 
 @dp.callback_query_handler(text='podpisk')
 async def check_podpisk(call: types.CallbackQuery):
     user_status = await call.bot.get_chat_member(chat_id=kanal_id, user_id=call.from_user.id)
     msg_id = call['message']
-    print(msg_id['message_id'])
+    msg_start = '''<b>Как пользоваться ботом:</b>\n\n
+➕ <b>Добавить запись</b> - Нажмите, чтобы добавить запись о Вашем настроении на данный момент \n\n
+📊 <b>Статистика</b> - Нажмите, чтобы открыть панель статистики \n
+- 📈 <b>Вывод графика</b> за определенный период (неделя/месяц/год) \n
+- 📁 <b>Экспорт XML</b> - Данная функция еще находится в разработке \n\n
+⚙️<b>Настройки</b> - Нажмите, чтобы открыть панель настроек бота \n
+- 👤 <b>Профиль</b> - В данном разделе Вы можете посмотреть подробную информацию о своём профиле в боте \n
+- 🔔 <b>Напоминания</b> - В этом разделе Вы можете установить количество и время для напоминаний о записи настроения \n
+- 🤖 <b>О боте</b> - А в это разделе Вы можете посмтореть информацию о боте'''
+
     if user_status['status'] != 'left':
         await call.bot.delete_message(call.from_user.id, int(msg_id['message_id']))
         await call.bot.send_message(call.from_user.id, "Вы успешно подписались на канал, спасибо!", reply_markup=markup)
+        await call.bot.send_message(call.from_user.id, msg_start, reply_markup=markup_start)
     else:
-        await call.bot.send_message(call.from_user.id, "Извините, но Вы не подписались на канал", reply_markup=markup_podpisk)
+        await call.bot.send_message(call.from_user.id, "Извините, но Вы не подписались на канал",
+                                    reply_markup=markup_podpisk)
 
 
 # -.-.-.-.-.-.-.-.-.-.-.-.- Старт -.-.-.-.-.-.-.-.-.-.-.-.-
@@ -92,18 +114,18 @@ async def start(message: types.Message):
     msg_kan = 'Для использования бота, пожалуйста, подпишитесь на канал' + '\n\n' + 'https://t.me/goodmood_kanal'
     await message.bot.send_message(message.from_user.id, msg_kan, reply_markup=markup_podpisk)
 
+
 # -.-.-.-.-.-.-..-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 
 @dp.message_handler()
 async def echo_message(message: types.Message):
     global count
     print('count_1 = ', count)
-    print(message)
     msg = message['text']
-    print(msg)
+    print((message['from'])['first_name'],' - ',msg)
+    print(message.from_user.id)
 
     user_status = await message.bot.get_chat_member(chat_id=kanal_id, user_id=message.from_user.id)
-    print(user_status['status'])
     if user_status['status'] != 'left' or int(message.from_user.id) == polya_id:
 
         if msg == "➕ Добавить запись":
@@ -115,7 +137,7 @@ async def echo_message(message: types.Message):
             if msg == " 😀 ":
                 mood = 5
                 BotDB.add_record(message.from_user.id, mood)
-
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
                 await message.bot.send_message(message.from_user.id,
                                                "✅ Запись о Вашем <b>настроении</b> успешно внесена!",
                                                reply_markup=markup)
@@ -123,6 +145,7 @@ async def echo_message(message: types.Message):
             elif msg == " 🙂 ":
                 mood = 4
                 BotDB.add_record(message.from_user.id, mood)
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
                 await message.bot.send_message(message.from_user.id,
                                                "✅ Запись о Вашем <b>настроении</b> успешно внесена!",
                                                reply_markup=markup)
@@ -130,6 +153,7 @@ async def echo_message(message: types.Message):
             elif msg == " 😕 ":
                 mood = 3
                 BotDB.add_record(message.from_user.id, mood)
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
                 await message.bot.send_message(message.from_user.id,
                                                "✅ Запись о Вашем <b>настроении</b> успешно внесена!",
                                                reply_markup=markup)
@@ -137,6 +161,7 @@ async def echo_message(message: types.Message):
             elif msg == " 😔 ":
                 mood = 2
                 BotDB.add_record(message.from_user.id, mood)
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
                 await message.bot.send_message(message.from_user.id,
                                                "✅ Запись о Вашем <b>настроении</b> успешно внесена!",
                                                reply_markup=markup)
@@ -144,34 +169,41 @@ async def echo_message(message: types.Message):
             elif msg == " 😭 ":
                 mood = 1
                 BotDB.add_record(message.from_user.id, mood)
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
                 await message.bot.send_message(message.from_user.id,
                                                "✅ Запись о Вашем <b>настроении</b> успешно внесена!",
                                                reply_markup=markup)
                 count = 0
             elif msg == "🔙 Назад":
-                await message.bot.send_message(message.from_user.id, "🔙 Возвращаемся в главное меню", reply_markup=markup)
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
+                await message.bot.send_message(message.from_user.id, "🔙 Возвращаемся в главное меню",
+                                               reply_markup=markup)
                 count = 0
                 await message.bot.delete_message(message.from_user.id, int(message['message_id']))
         elif msg == "📊  Статистика":
-            try:
-                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
-                await message.bot.send_message(message.from_user.id, "📊  Статистика", reply_markup=markup_statistic)
-            except:
-                print('Ошибка')
+            await message.bot.delete_message(message.from_user.id, int(message['message_id']))
+            await message.bot.send_message(message.from_user.id, "📊  Статистика", reply_markup=markup_statistic)
 
             count = 2
         elif count == 2:
             if msg == "📈 График за неделю":
                 records_week = BotDB.get_records(message.from_user.id, 'week')
-                print('records_week - ', records_week)
-                print('len - ', len(records_week))
+                #print('records_week - ', records_week)
+                #print('len - ', len(records_week))
                 if len(records_week):
-                    draw_function('week', records_week)
-
-                    await message.bot.send_message(message.from_user.id, 'Ваша статистика настроений за неделю', reply_markup=markup)
-                    await message.bot.send_photo(message.from_user.id, open('pic.png', 'rb'))
+                    draw_function('week', records_week, message.from_user.id)
+                    await message.bot.delete_message(message.from_user.id, int(message['message_id']))
+                    await message.bot.send_message(message.from_user.id, 'Ваша статистика настроений за неделю',
+                                                   reply_markup=markup)
+                    name_pic = 'pic_' + str(message.from_user.id) + '.png'
+                    await message.bot.send_photo(message.from_user.id, open(name_pic, 'rb'))
+                    if os.path.isfile(name_pic):
+                        os.remove(name_pic)
+                    else:
+                        await message.bot.send_message(admin_id, "Проблема с удалением png "+str(message.from_user.id), reply_markup=markup)
                     count = 0
                 else:
+                    await message.bot.delete_message(message.from_user.id, int(message['message_id']))
                     await message.bot.send_message(message.from_user.id, 'Записей не обнаружено', reply_markup=markup)
                     count = 0
             if msg == "📈 График за месяц":
@@ -185,7 +217,8 @@ async def echo_message(message: types.Message):
                         record.append(str(rec[2]))
                         record_all.append(' - '.join(record))
                     r = '\n'.join(record_all)
-                    await message.bot.send_message(message.from_user.id, 'Ваша статистика настроений за месяц  \n\n' + r, reply_markup=markup)
+                    await message.bot.send_message(message.from_user.id,
+                                                   'Ваша статистика настроений за месяц  \n\n' + r, reply_markup=markup)
                     count = 0
                 else:
                     await message.bot.send_message(message.from_user.id, 'Записей не обнаружено', reply_markup=markup)
@@ -201,15 +234,19 @@ async def echo_message(message: types.Message):
                         record.append(str(rec[2]))
                         record_all.append(' - '.join(record))
                     r = '\n'.join(record_all)
-                    await message.bot.send_message(message.from_user.id, 'Ваша статистика настроений за год  \n\n' + r, reply_markup=markup)
+                    await message.bot.send_message(message.from_user.id, 'Ваша статистика настроений за год  \n\n' + r,
+                                                   reply_markup=markup)
                     count = 0
                 else:
                     await message.bot.send_message(message.from_user.id, 'Записей не обнаружено', reply_markup=markup)
                     count = 0
             if msg == "📁 Экспорт XML":
-                await message.bot.send_message(message.from_user.id, "Доступно только в <b>Premium</b>", reply_markup=markup_statistic)
+                await message.bot.send_message(message.from_user.id, "Временно недоступно",
+                                               reply_markup=markup_statistic)
             if msg == "🔙 Назад":
-                await message.bot.send_message(message.from_user.id, "🔙 Возвращаемся в главное меню", reply_markup=markup)
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
+                await message.bot.send_message(message.from_user.id, "🔙 Возвращаемся в главное меню",
+                                               reply_markup=markup)
                 count = 0
 
         elif msg == "⚙️Настройки":
@@ -221,12 +258,16 @@ async def echo_message(message: types.Message):
             if msg == "🔔 Напоминания":
                 await message.bot.send_message(message.from_user.id, "Напоминания", reply_markup=markup_settings)
             if msg == "🤖 О боте":
-                stroke = "Версия бота - "+str(ver)
-                stroke1 = "<b>GoodMood</b> - Это отличный бот для людей, которые предпочитают визуально выбирать, что они чувствуют, чем словами описывать своё состояние.\n\n GoodMood включает в себя инструмент «Статистика», который позволяет записывать ваше настроение таким образом, чтобы вы могли выявить закономерности в своих чувствах и поведении. Вы всегда можете проанализировать свои предыдущие записи, чтобы в конечном итоге научиться анализировать своё настроение и  справляться с депрессией.\n\n Версия бота - " + str(ver) + "\n\nВопросы и предложения - @purple_bread"
+                stroke = "Версия бота - " + str(ver)
+                stroke1 = "<b>GoodMood</b> - Это отличный бот для людей, которые предпочитают визуально выбирать, что они чувствуют, чем словами описывать своё состояние.\n\n GoodMood включает в себя инструмент «Статистика», который позволяет записывать ваше настроение таким образом, чтобы вы могли выявить закономерности в своих чувствах и поведении. Вы всегда можете проанализировать свои предыдущие записи, чтобы в конечном итоге научиться анализировать своё настроение и  справляться с депрессией.\n\n Версия бота - " + str(
+                    ver) + "\n\nВопросы и предложения - @purple_bread"
                 await message.bot.send_message(message.from_user.id, stroke1, reply_markup=markup)
                 count = 0
             if msg == "🔙 Назад":
-                await message.bot.send_message(message.from_user.id, "🔙 Возвращаемся в главное меню", reply_markup=markup)
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
+                await message.bot.send_message(message.from_user.id, "🔙 Возвращаемся в главное меню",
+                                               reply_markup=markup)
+
                 count = 0
         elif msg == "🖋 Редактировать последнюю запись":
             await message.bot.send_message(message.from_user.id, "Редактировать последнюю запись", reply_markup=markup)
@@ -254,10 +295,10 @@ async def echo_message(message: types.Message):
             c = BotDB.read_sqlite_table()
             msg_z = str(msg)
             if msg_z != '🔙 Назад':
-                for i in range (0, len(c)):
+                for i in range(0, len(c)):
                     err = 'Не удалось отправить сообщение -' + str(c[i])
                     try:
-                            await message.bot.send_message(int(c[i]), msg_z, reply_markup=markup)
+                        await message.bot.send_message(int(c[i]), msg_z, reply_markup=markup)
                     except:
                         await message.bot.send_message(admin_id, err, reply_markup=markup)
                 await message.bot.send_message(admin_id, 'Отправка успешно завершена', reply_markup=markup)
@@ -277,7 +318,9 @@ async def echo_message(message: types.Message):
                 count = 0
         elif msg == "🔙 Назад":
             if count == 5:
-                await message.bot.send_message(message.from_user.id, "🔙 Возвращаемся в главное меню", reply_markup=markup)
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
+                await message.bot.send_message(message.from_user.id, "🔙 Возвращаемся в главное меню",
+                                               reply_markup=markup)
                 count = 0
         else:
             try:
@@ -288,9 +331,7 @@ async def echo_message(message: types.Message):
                 await message.bot.send_message(admin_id, "Там у кого-то ошибка", reply_markup=markup)
 
     else:
-        msg_kan = 'Для использования бота, пожалуйста, подпишитесь на канал'+'\n\n'+'https://t.me/goodmood_kanal'
+        msg_kan = 'Для использования бота, пожалуйста, подпишитесь на канал' + '\n\n' + 'https://t.me/goodmood_kanal'
         await message.bot.send_message(message.from_user.id, msg_kan, reply_markup=markup_podpisk)
     print('count_2 = ', count)
     print('-----------------------------')
-
-
