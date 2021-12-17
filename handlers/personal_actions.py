@@ -1,84 +1,22 @@
 from aiogram import types
 from dispatcher import dp
-import re
 from bot import BotDB, ver
 from draw_table import draw_function
 from config import admin_id, kanal_id, polya_id
-from PIL import Image, ImageDraw
 import os
+from markups import markup, markup_start, markup_mood, markup_podpisk, markup_statistic, markup_admin, markup_settings, markup_back
 global markup, markup_mood
 count = 0
 global user_status
 
-# -.-.-.-.-.-.-.-.-.-.-.-.- Таблица меню -.-.-.-.-.-.-.-.-.-.-.-.-
 
-markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-item1 = types.KeyboardButton("➕ Добавить запись")
-item2 = types.KeyboardButton("📊  Статистика")
-item3 = types.KeyboardButton("⚙️Настройки")
-markup.add(item1, item2, item3)
-
-# -.-.-.-.-.-.-.-.-.-.-.-.- Таблица админа -.-.-.-.-.-.-.-.-.-.-.-.-
-
-markup_admin = types.ReplyKeyboardMarkup(resize_keyboard=True)
-item1 = types.KeyboardButton("Отправить всем сообщение")
-item2 = types.KeyboardButton("Кол-во пользователей")
-item3 = types.KeyboardButton("🔙 Назад")
-markup_admin.add(item1, item2, item3)
-
-# -.-.-.-.-.-.-.-.-.-.-.-.- Таблица выбора настроения -.-.-.-.-.-.-.-.-.-.-.-.-
-
-markup_mood = types.ReplyKeyboardMarkup(resize_keyboard=True)
-item1 = types.KeyboardButton(" 😀 ", callback_data='nice')
-item2 = types.KeyboardButton(" 🙂 ", callback_data='good')
-item3 = types.KeyboardButton(" 😕 ", callback_data='-')
-item4 = types.KeyboardButton(" 😔 ", callback_data='bad')
-item5 = types.KeyboardButton(" 😭 ", callback_data='verybad')
-item6 = types.KeyboardButton("🔙 Назад", callback_data='back')
-markup_mood.add(item1, item2, item3, item4, item5, item6)
-
-# -.-.-.-.-.-.-.-.-.-.-.-.- Таблица проверки подписки -.-.-.-.-.-.-.-.-.-.-.-.-
-
-markup_podpisk = types.InlineKeyboardMarkup(resize_keyboard=True)
-item1 = types.InlineKeyboardButton("Подписаться", callback_data='link_podpisk', url='https://t.me/goodmood_kanal')
-item2 = types.InlineKeyboardButton("✅ Я подписался", callback_data='podpisk')
-markup_podpisk.add(item1, item2)
-
-# -.-.-.-.-.-.-.-.-.-.-.-.- Таблица хз как назвать -.-.-.-.-.-.-.-.-.-.-.-.-
-
-markup_start = types.InlineKeyboardMarkup(resize_keyboard=True)
-item1 = types.InlineKeyboardButton("✅ Я подписался", callback_data='ready')
-markup_start.add(item1)
-
-# -.-.-.-.-.-.-.-.-.-.-.-.- Таблица статистики -.-.-.-.-.-.-.-.-.-.-.-.-
-
-
-markup_statistic = types.ReplyKeyboardMarkup(resize_keyboard=True)
-item1 = types.KeyboardButton("📈 График за неделю")
-item2 = types.KeyboardButton("📈 График за месяц")
-item3 = types.KeyboardButton("📈 График за год")
-item4 = types.KeyboardButton("📁 Экспорт XML")
-item5 = types.KeyboardButton("🔙 Назад")
-markup_statistic.add(item1, item2, item3, item4, item5)
-
-# -.-.-.-.-.-.-.-.-.-.-.-.- Таблица настроек -.-.-.-.-.-.-.-.-.-.-.-.-
-
-
-markup_settings = types.ReplyKeyboardMarkup(resize_keyboard=True)
-item1 = types.KeyboardButton("👤 Профиль")
-item2 = types.KeyboardButton("🔔 Напоминания")
-item3 = types.KeyboardButton("🤖 О боте")
-item4 = types.KeyboardButton("🔙 Назад")
-markup_settings.add(item1, item2, item3, item4)
-
-
-# -.-.-.-.-.-.-.-.-.-.-.-.- -.-.-.-.-.-.-.-.-.-.-.-.-
+# -.-.-.-.-.-.-.-.-.-.-.-.- -.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 @dp.callback_query_handler(text='ready')
 async def ready_start(call: types.CallbackQuery):
     msg_id = call['message']
     await call.bot.delete_message(call.from_user.id, int(msg_id['message_id']))
 
-
+# -.-.-.-.-.-.-.-.-.-.-.-.- -.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 
 @dp.callback_query_handler(text='podpisk')
 async def check_podpisk(call: types.CallbackQuery):
@@ -101,7 +39,6 @@ async def check_podpisk(call: types.CallbackQuery):
     else:
         await call.bot.send_message(call.from_user.id, "Извините, но Вы не подписались на канал",
                                     reply_markup=markup_podpisk)
-
 
 # -.-.-.-.-.-.-.-.-.-.-.-.- Старт -.-.-.-.-.-.-.-.-.-.-.-.-
 
@@ -127,6 +64,8 @@ async def echo_message(message: types.Message):
 
     user_status = await message.bot.get_chat_member(chat_id=kanal_id, user_id=message.from_user.id)
     if user_status['status'] != 'left' or int(message.from_user.id) == polya_id:
+
+#---------------------------------------------------------
 
         if msg == "➕ Добавить запись":
             await message.bot.send_message(message.from_user.id, "Выберите Ваше <b>настроение</b> <u>сейчас</u>!",
@@ -180,6 +119,9 @@ async def echo_message(message: types.Message):
                                                reply_markup=markup)
                 count = 0
                 await message.bot.delete_message(message.from_user.id, int(message['message_id']))
+
+#---------------------------------------------------------
+
         elif msg == "📊  Статистика":
             await message.bot.delete_message(message.from_user.id, int(message['message_id']))
             await message.bot.send_message(message.from_user.id, "📊  Статистика", reply_markup=markup_statistic)
@@ -249,14 +191,20 @@ async def echo_message(message: types.Message):
                                                reply_markup=markup)
                 count = 0
 
+#---------------------------------------------------------
+
         elif msg == "⚙️Настройки":
+            await message.bot.delete_message(message.from_user.id, int(message['message_id']))
             await message.bot.send_message(message.from_user.id, "Настройки", reply_markup=markup_settings)
             count = 3
         elif count == 3:
             if msg == "👤 Профиль":
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
                 await message.bot.send_message(message.from_user.id, "Профиль", reply_markup=markup_settings)
             if msg == "🔔 Напоминания":
-                await message.bot.send_message(message.from_user.id, "Напоминания", reply_markup=markup_settings)
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
+                await message.bot.send_message(message.from_user.id, "Напишите сколько раз в день Вы хотите оценивать своё настроение:\n(От 1 до 10)", reply_markup=markup_back)
+                count = 3.1
             if msg == "🤖 О боте":
                 stroke = "Версия бота - " + str(ver)
                 stroke1 = "<b>GoodMood</b> - Это отличный бот для людей, которые предпочитают визуально выбирать, что они чувствуют, чем словами описывать своё состояние.\n\n GoodMood включает в себя инструмент «Статистика», который позволяет записывать ваше настроение таким образом, чтобы вы могли выявить закономерности в своих чувствах и поведении. Вы всегда можете проанализировать свои предыдущие записи, чтобы в конечном итоге научиться анализировать своё настроение и  справляться с депрессией.\n\n Версия бота - " + str(
@@ -267,8 +215,23 @@ async def echo_message(message: types.Message):
                 await message.bot.delete_message(message.from_user.id, int(message['message_id']))
                 await message.bot.send_message(message.from_user.id, "🔙 Возвращаемся в главное меню",
                                                reply_markup=markup)
-
                 count = 0
+        elif count == 3.1:
+            if msg == "🔙 Назад":
+                await message.bot.send_message(message.from_user.id, "🔙 Возвращаемся в главное меню",
+                                               reply_markup=markup)
+                await message.bot.delete_message(message.from_user.id, int(message['message_id']))
+                await message.bot.delete_message(message.from_user.id, int(message['message_id'])-1)
+                count = 0
+            else:
+                try:
+
+
+                    await message.bot.send_message(message.from_user.id, "Отлично! Теперь ваша ежедневная задача отмечать свое настроение <b>"+str(int(msg))+"</b> в день",
+                                                  reply_markup=markup)
+                except:
+                    await message.bot.send_message(message.from_user.id, "Введите корректное значение - число от 1 до 10", reply_markup=markup_back)
+
         elif msg == "🖋 Редактировать последнюю запись":
             await message.bot.send_message(message.from_user.id, "Редактировать последнюю запись", reply_markup=markup)
             count = 4

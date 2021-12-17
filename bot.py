@@ -4,7 +4,7 @@ from dispatcher import dp
 import handlers
 from db import BotDB
 
-ver = 1.2
+ver = 1.3
 
 BotDB = BotDB('mood_bot.db')
 if __name__ == "__main__":
