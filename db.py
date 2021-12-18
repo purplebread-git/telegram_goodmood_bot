@@ -16,6 +16,16 @@ class BotDB:
         self.cursor.execute("select count(*) from `users`")
         return self.cursor.fetchone()
 
+    def update_daily_count(self, dev_id, value):
+
+        sql_update_query = """Update users set daily_count = ? where id = ?"""
+        data = (value, dev_id)
+        self.cursor.execute(sql_update_query, data)
+        self.conn.commit()
+        print("Запись успешно обновлена")
+
+
+
     def get_user_id(self, user_id):
         """Достаем id юзера в базе по его user_id"""
         result = self.cursor.execute("SELECT `id` FROM `users` WHERE `user_id` = ?", (user_id,))

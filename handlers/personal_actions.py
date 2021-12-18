@@ -3,7 +3,9 @@ from dispatcher import dp
 from bot import BotDB, ver
 from draw_table import draw_function
 from config import admin_id, kanal_id, polya_id
+from daily_table import draw_table
 import os
+from datetime import datetime
 from markups import markup, markup_start, markup_mood, markup_podpisk, markup_statistic, markup_admin, markup_settings, markup_back
 global markup, markup_mood
 count = 0
@@ -59,6 +61,7 @@ async def echo_message(message: types.Message):
     global count
     print('count_1 = ', count)
     msg = message['text']
+    print(message)
     print((message['from'])['first_name'],' - ',msg)
     print(message.from_user.id)
 
@@ -225,12 +228,25 @@ async def echo_message(message: types.Message):
                 count = 0
             else:
                 try:
+                    if int(msg) >= 1 and int(msg) <= 10:
+                        id_table = BotDB.get_user_id(message.from_user.id)
+                        BotDB.update_daily_count(id_table, msg)
+                        records_week = BotDB.get_records(message.from_user.id, 'week')
+                        ready_table = draw_table(records_week, msg)
+                        print(ready_table)
+                        #draw_table()
 
-
-                    await message.bot.send_message(message.from_user.id, "Отлично! Теперь ваша ежедневная задача отмечать свое настроение <b>"+str(int(msg))+"</b> в день",
+                        await message.bot.send_message(message.from_user.id, "Отлично! Теперь ваша ежедневная задача отмечать свое настроение <b>"+str(int(msg))+"</b> в день",
                                                   reply_markup=markup)
+                        await message.bot.send_message(message.from_user.id,str(ready_table) ,reply_markup=markup)
+                        count = 0
+
+                    else:
+                        await message.bot.send_message(message.from_user.id,
+                                                       "1 Введите корректное значение - число от 1 до 10",
+                                                       reply_markup=markup_back)
                 except:
-                    await message.bot.send_message(message.from_user.id, "Введите корректное значение - число от 1 до 10", reply_markup=markup_back)
+                    await message.bot.send_message(message.from_user.id, "2 Введите корректное значение - число от 1 до 10", reply_markup=markup_back)
 
         elif msg == "🖋 Редактировать последнюю запись":
             await message.bot.send_message(message.from_user.id, "Редактировать последнюю запись", reply_markup=markup)
