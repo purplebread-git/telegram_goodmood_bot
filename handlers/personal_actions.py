@@ -135,6 +135,7 @@ async def echo_message(message: types.Message):
                 records_week = BotDB.get_records(message.from_user.id, 'week')
                 #print('records_week - ', records_week)
                 #print('len - ', len(records_week))
+                print(records_week)
                 if len(records_week):
                     draw_function('week', records_week, message.from_user.id)
                     await message.bot.delete_message(message.from_user.id, int(message['message_id']))

@@ -3,7 +3,6 @@ import datetime
 
 c = [[1, 2, 3, 4, 5, 5], [4, 5, 3], [5], [], [], [], [1, 3]]
 n = 5
-mass = [[], [], [], [], [], [], []]
 mass_week_days = [[' <b>Понедельник</b> - '], [' <b>Вторник</b> - '], [' <b>Среда</b> - '], [' <b>Четверг</b> - '], [' <b>Пятница</b> - '], [' <b>Суббота</b> - '], [' <b>Воскресенье</b> - ']]
 
 # time = 2021-12-17
@@ -39,31 +38,35 @@ def draw_table(week_records, count):
     week_day = int(time.strftime("%w"))
     for i in range(1, 8):
         day_date = time + datetime.timedelta(days= i - week_day)
-        mass[i-1].append(str(day_date))
         msg = msg + str(day_date)
-        mass[i-1].append(str(mass_week_days[i-1][0]))
         msg = msg + str(mass_week_days[i-1][0])
         for j in range(0, int(count)):
               try:
-                  mass[i-1].append(str((week_mood[i-1])[j]))
-                  msg = msg + str((week_mood[i-1])[j])
-                  mass[i-1].append('/')
+                  if int((week_mood[i-1])[j]) == 5:
+                      msg = msg + "😀"
+                  if int((week_mood[i-1])[j]) == 4:
+                      msg = msg + "🙂"
+                  if int((week_mood[i - 1])[j]) == 3:
+                      msg = msg + "😕"
+                  if int((week_mood[i-1])[j]) == 2:
+                      msg = msg + "😔"
+                  if int((week_mood[i-1])[j]) == 1:
+                      msg = msg + "😭"
                   msg = msg + '/'
               except:
-                  if day_date <= time:
-                        mass[i - 1].append('❌')
+                  if day_date < time:
+
                         msg = msg + '❌'
-                        mass[i - 1].append('/')
+
                         msg = msg + '/'
                   else:
-                        mass[i - 1].append('⚪')
+
                         msg = msg + '⚪'
-                        mass[i - 1].append('/')
+
                         msg = msg + '/'
 
-        mass[i - 1].append(' \n')
+
         msg = msg + ' \n'
-        print(mass[i-1])
     print(msg)
 
     print(time, week_day)
