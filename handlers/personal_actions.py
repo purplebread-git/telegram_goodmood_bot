@@ -154,6 +154,7 @@ async def echo_message(message: types.Message):
                     count = 0
             if msg == "📈 График за месяц":
                 records_month = BotDB.get_records(message.from_user.id, 'month')
+                print(records_month)
                 if len(records_month):
                     record_all = []
                     for i in range(0, len(records_month)):
