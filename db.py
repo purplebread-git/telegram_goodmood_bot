@@ -54,8 +54,9 @@ class BotDB:
         elif(within == "month"):
             result = self.cursor.execute("SELECT * FROM `records` WHERE `users_id` = ? AND `date` BETWEEN datetime('now', 'start of month') AND datetime('now', 'localtime') ORDER BY `date`",
                 (self.get_user_id(user_id),))
-            #result = self.cursor.execute("SELECT `date` FROM `records` WHERE `users_id` = ? AND `date` BETWEEN strftime('%d','now', 'start of month') AND strftime('%d','now', 'localtime')",
+            #result1 = self.cursor.execute("SELECT `date` FROM `records` BETWEEN strftime('%d','now', 'start of month') AND strftime('%d','now', 'localtime')",
                 #(self.get_user_id(user_id),))
+            print(result1)
 
 
         return result.fetchall()

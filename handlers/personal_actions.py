@@ -137,17 +137,21 @@ async def echo_message(message: types.Message):
                 #print('len - ', len(records_week))
                 print(records_week)
                 if len(records_week):
-                    draw_function('week', records_week, message.from_user.id)
-                    await message.bot.delete_message(message.from_user.id, int(message['message_id']))
-                    await message.bot.send_message(message.from_user.id, 'Ваша статистика настроений за неделю',
-                                                   reply_markup=markup)
-                    name_pic = 'pic_' + str(message.from_user.id) + '.png'
-                    await message.bot.send_photo(message.from_user.id, open(name_pic, 'rb'))
-                    if os.path.isfile(name_pic):
-                        os.remove(name_pic)
-                    else:
-                        await message.bot.send_message(admin_id, "Проблема с удалением png "+str(message.from_user.id), reply_markup=markup)
-                    count = 0
+                    ret = draw_function('week', records_week, message.from_user.id)
+                    if ret == 1:
+                        await message.bot.delete_message(message.from_user.id, int(message['message_id']))
+                        await message.bot.send_message(message.from_user.id, 'Ваша статистика настроений за неделю',
+                                                       reply_markup=markup)
+                        name_pic = 'pic_' + str(message.from_user.id) + '.png'
+                        await message.bot.send_photo(message.from_user.id, open(name_pic, 'rb'))
+                        if os.path.isfile(name_pic):
+                            os.remove(name_pic)
+                        else:
+                            await message.bot.send_message(admin_id, "Проблема с удалением png "+str(message.from_user.id), reply_markup=markup)
+                        count = 0
+                    if ret == 0:
+                        await message.bot.send_message(message.from_user.id, 'За один день мы не сможем построить для Вас график. Отметьте завтра настроение и попробуйте снова',
+                                                       reply_markup=markup)
                 else:
                     await message.bot.delete_message(message.from_user.id, int(message['message_id']))
                     await message.bot.send_message(message.from_user.id, 'Записей не обнаружено', reply_markup=markup)
