@@ -1,7 +1,7 @@
 from aiogram import types
 from dispatcher import dp
 from bot import BotDB, ver
-from draw_table import draw_function
+from draw_table import draw_function, draw_table_month
 from config import admin_id, kanal_id, polya_id
 from daily_table import draw_table
 import os
@@ -61,9 +61,8 @@ async def echo_message(message: types.Message):
     global count
     print('count_1 = ', count)
     msg = message['text']
-    print(message)
-    print((message['from'])['first_name'],' - ',msg)
-    print(message.from_user.id)
+    #print(message)
+    print((message['from'])['first_name'], (message['from'])['last_name'], ' - ', msg, ' - ', (message['from'])['id'])
 
     user_status = await message.bot.get_chat_member(chat_id=kanal_id, user_id=message.from_user.id)
     if user_status['status'] != 'left' or int(message.from_user.id) == polya_id:
@@ -135,7 +134,7 @@ async def echo_message(message: types.Message):
                 records_week = BotDB.get_records(message.from_user.id, 'week')
                 #print('records_week - ', records_week)
                 #print('len - ', len(records_week))
-                print(records_week)
+                print('records_week - ', records_week)
                 if len(records_week):
                     ret = draw_function('week', records_week, message.from_user.id)
                     if ret == 1:
@@ -150,7 +149,7 @@ async def echo_message(message: types.Message):
                             await message.bot.send_message(admin_id, "Проблема с удалением png "+str(message.from_user.id), reply_markup=markup)
                         count = 0
                     if ret == 0:
-                        await message.bot.send_message(message.from_user.id, 'За один день мы не сможем построить для Вас график. Отметьте завтра настроение и попробуйте снова',
+                        await message.bot.send_message(message.from_user.id, 'За один день  мы не сможем построить для Вас график. Отметьте завтра настроение и попробуйте снова',
                                                        reply_markup=markup)
                 else:
                     await message.bot.delete_message(message.from_user.id, int(message['message_id']))
@@ -158,39 +157,28 @@ async def echo_message(message: types.Message):
                     count = 0
             if msg == "📈 График за месяц":
                 records_month = BotDB.get_records(message.from_user.id, 'month')
-                print(records_month)
+                #print('records_month - ', records_month)
                 if len(records_month):
-                    record_all = []
-                    for i in range(0, len(records_month)):
-                        record = []
-                        rec = records_month[i]
-                        record.append(str(rec[3]))
-                        record.append(str(rec[2]))
-                        record_all.append(' - '.join(record))
-                    r = '\n'.join(record_all)
-                    await message.bot.send_message(message.from_user.id,
-                                                   'Ваша статистика настроений за месяц  \n\n' + r, reply_markup=markup)
+                    draw_table_month('month', records_month, message.from_user.id)
+                    await message.bot.delete_message(message.from_user.id, int(message['message_id']))
+                    await message.bot.send_message(message.from_user.id, 'Ваша статистика настроений за месяц:',
+                                                   reply_markup=markup)
+                    name_pic = 'pic_' + str(message.from_user.id) + '.png'
+                    await message.bot.send_photo(message.from_user.id, open(name_pic, 'rb'))
+                    if os.path.isfile(name_pic):
+                        os.remove(name_pic)
+                    else:
+                        await message.bot.send_message(admin_id,
+                                                       "Проблема с удалением png " + str(message.from_user.id),
+                                                       reply_markup=markup)
                     count = 0
                 else:
-                    await message.bot.send_message(message.from_user.id, 'Записей не обнаружено', reply_markup=markup)
-                    count = 0
+                    await message.bot.send_message(message.from_user.id, "Записей не обнаружено", reply_markup=markup)
+                count = 0
             if msg == "📈 График за год":
                 records_year = BotDB.get_records(message.from_user.id, 'year')
                 if len(records_year):
-                    record_all = []
-                    for i in range(0, len(records_year)):
-                        record = []
-                        rec = records_year[i]
-                        record.append(str(rec[3]))
-                        record.append(str(rec[2]))
-                        record_all.append(' - '.join(record))
-                    r = '\n'.join(record_all)
-                    await message.bot.send_message(message.from_user.id, 'Ваша статистика настроений за год  \n\n' + r,
-                                                   reply_markup=markup)
-                    count = 0
-                else:
-                    await message.bot.send_message(message.from_user.id, 'Записей не обнаружено', reply_markup=markup)
-                    count = 0
+                    print(0)
             if msg == "📁 Экспорт XML":
                 await message.bot.send_message(message.from_user.id, "Временно недоступно",
                                                reply_markup=markup_statistic)
@@ -253,21 +241,6 @@ async def echo_message(message: types.Message):
                                                        reply_markup=markup_back)
                 except:
                     await message.bot.send_message(message.from_user.id, "2 Введите корректное значение - число от 1 до 10", reply_markup=markup_back)
-
-        elif msg == "🖋 Редактировать последнюю запись":
-            await message.bot.send_message(message.from_user.id, "Редактировать последнюю запись", reply_markup=markup)
-            count = 4
-        elif msg == "/secret":
-            await message.bot.send_message(message.from_user.id, "Люблю тебя, Поля!", reply_markup=markup)
-            await message.answer_sticker(r'CAACAgIAAxkBAAEDZmVhqMklwbAWpOwq6Ia9PVS6nJbM7wACFwMAAladvQrnhi7ExlTFGyIE')
-            count = 0
-        elif msg == "/admin":
-            if int(message.from_user.id) == admin_id:
-                await message.bot.send_message(message.from_user.id, "Привет админ!", reply_markup=markup_admin)
-                count = 5
-            else:
-                await message.bot.send_message(message.from_user.id, "Вы не админ, извините!", reply_markup=markup)
-                count = 0
         elif msg == "Отправить всем сообщение":
             if count == 5:
                 count_text = "Введи сообщение:"
@@ -306,6 +279,20 @@ async def echo_message(message: types.Message):
                 await message.bot.delete_message(message.from_user.id, int(message['message_id']))
                 await message.bot.send_message(message.from_user.id, "🔙 Возвращаемся в главное меню",
                                                reply_markup=markup)
+                count = 0
+
+#---------------------------------------------------------
+
+        elif msg == "/secret":
+            await message.bot.send_message(message.from_user.id, "Люблю тебя, Поля!", reply_markup=markup)
+            await message.answer_sticker(r'CAACAgIAAxkBAAEDZmVhqMklwbAWpOwq6Ia9PVS6nJbM7wACFwMAAladvQrnhi7ExlTFGyIE')
+            count = 0
+        elif msg == "/admin":
+            if int(message.from_user.id) == admin_id:
+                await message.bot.send_message(message.from_user.id, "Привет админ!", reply_markup=markup_admin)
+                count = 5
+            else:
+                await message.bot.send_message(message.from_user.id, "Вы не админ, извините!", reply_markup=markup)
                 count = 0
         else:
             try:

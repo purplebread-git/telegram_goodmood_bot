@@ -17,7 +17,7 @@ from PIL import Image, ImageDraw
                 (52, 3, 5, '2021-11-05 16:50:01', '0'),(53, 3, 5, '2021-11-05 16:50:01', '0')]'''
 
 
-records_month = [(9, 3, 1, '2021-12-01 16:50:01', '3'), (32, 3, 5, '2021-12-02 23:29:27', '4'), (33, 3, 4, '2021-12-02 23:34:46', '4'), (46, 3, 5, '2021-12-03 00:23:56', '5'), (61, 3, 5, '2021-12-03 23:12:41', '5'), (74, 3, 1, '2021-12-04 00:13:22', '6'), (76, 3, 5, '2021-12-04 00:43:02', '6'), (91, 3, 5, '2021-12-15 21:00:57', '3'), (104, 3, 4, '2021-12-18 03:29:43', '6'), (105, 3, 2, '2021-12-18 03:55:12', '6'), (106, 3, 5, '2021-12-18 03:55:29', '6'), (107, 3, 5, '2021-12-20 00:45:17', '1'), (109, 3, 3, '2021-12-20 01:04:50', '1')]
+#records_month = [('12', '01', 1), ('12', '02', 5), ('12', '02', 4), ('12', '03', 5), ('12', '03', 5), ('12', '04', 1), ('12', '04', 5), ('12', '15', 5), ('12', '18', 4), ('12', '18', 2), ('12', '18', 5), ('12', '20', 5), ('12', '20', 3), ('12', '21', 5)]
 
 
 def draw_function(form_type, mood, id):
@@ -91,9 +91,70 @@ def draw_function(form_type, mood, id):
         print(ret)
         return ret
 
+def draw_table_month(form_type, mood, id):
+        global new_img
+        if form_type == "month":
+            mood = list(mood)
 
-    #if form_type == "month":
-        #d = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
+            d = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
+            x = []
+            x_1 = 161.9735
+            for i in range(0, len(mood)):
+                rec = list(mood[i])
+                mood[i] = rec
+                if rec[1] == '01':
+                    rec[1] = '1'
+                if rec[1] == '02':
+                    rec[1] = '2'
+                if rec[1] == '03':
+                    rec[1] = '3'
+                if rec[1] == '04':
+                    rec[1] = '4'
+                if rec[1] == '05':
+                    rec[1] = '5'
+                if rec[1] == '06':
+                    rec[1] = '6'
+                if rec[1] == '07':
+                    rec[1] = '7'
+                if rec[1] == '08':
+                    rec[1] = '8'
+                if rec[1] == '09':
+                    rec[1] = '9'
 
+                d[int(rec[1])-1].append(rec[2])
+            for j in range(0, len(d)):
+                x.append(round(x_1+j*24.7895, 4))
+                summ = 0
+                a = 0
+                if len(d[j]) > 1:
+                    d_2 = d[j]
+                    for i in range(0, len(d_2)):
+                        summ = float(summ + int(d_2[0]))
+                        d[j].pop(0)
+                        a = a + 1
+                    ravn = summ / a
+                    d[j] = [(round((ravn), 2))]
+            #print(mood)
+            #print(d)
 
-#draw_function('month', records_month, '454025767')
+            a = []
+            b = []
+            #print(x)
+            new_img = Image.open('month.jpg')
+            draw = ImageDraw.Draw(new_img)
+
+            for l in range(0, len(d)):
+                if not d[l] == []:
+                    a.append((x[l]))
+                    b.append(round((768 - (round((d[l])[0] * 123.9471 - 11.9736, 4)) - 48.2646), 4))
+                    # print(l, ' - ', a)
+                    # print(l, ' - ', b)
+                    # print('--------')
+            for l in range(0, len(a)):
+                if l < len(a) - 1:
+                    draw.line((a[l], b[l], a[l + 1], b[l + 1]), fill=(0, 0, 0), width=4)
+
+            name_pic = 'pic_' + str(id) + '.png'
+            new_img.save(name_pic, "PNG")
+
+#draw_table_month("month", records_month, '454025767')

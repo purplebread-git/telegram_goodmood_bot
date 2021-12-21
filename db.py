@@ -24,8 +24,6 @@ class BotDB:
         self.conn.commit()
         print("Запись успешно обновлена")
 
-
-
     def get_user_id(self, user_id):
         """Достаем id юзера в базе по его user_id"""
         result = self.cursor.execute("SELECT `id` FROM `users` WHERE `user_id` = ?", (user_id,))
@@ -37,28 +35,29 @@ class BotDB:
         return self.conn.commit()
 
     def add_record(self, user_id, value):
-        """Создаем запись о доходах/расходах"""
+        """Создаем запись """
         self.cursor.execute("INSERT INTO `records` (`users_id`, `value`) VALUES (?,?)",
-            (self.get_user_id(user_id), value))
+                            (self.get_user_id(user_id), value))
         return self.conn.commit()
 
-    def get_records(self, user_id, within = "all"):
+    def get_records(self, user_id, within="all"):
         """Получаем статистику"""
 
-        if(within == "year"):
-            result = self.cursor.execute("SELECT * FROM `records` WHERE `users_id` = ? AND `date` BETWEEN datetime('now', 'start of year') AND datetime('now', 'localtime') ORDER BY `date`",
+        if within == "year":
+            result = self.cursor.execute(
+                "SELECT * FROM `records` WHERE `users_id` = ? AND `date` BETWEEN datetime('now', 'start of year') AND datetime('now', 'localtime') ORDER BY `date`",
                 (self.get_user_id(user_id),))
-        elif(within == "week"):
-            result = self.cursor.execute("SELECT * FROM `records` WHERE `users_id` = ? AND `date` BETWEEN datetime('now', 'localtime', 'weekday 0', '-7 days') AND datetime('now', 'localtime') ORDER BY `date`",
+        elif within == "week":
+            result = self.cursor.execute(
+                "SELECT * FROM `records` WHERE `users_id` = ? AND `date` BETWEEN datetime('now', 'localtime', 'weekday 0', '-7 days') AND datetime('now', 'localtime') ORDER BY `date`",
                 (self.get_user_id(user_id),))
-        elif(within == "month"):
-            result = self.cursor.execute("SELECT * FROM `records` WHERE `users_id` = ? AND `date` BETWEEN datetime('now', 'start of month') AND datetime('now', 'localtime') ORDER BY `date`",
+        elif within == "month":
+            result = self.cursor.execute(
+                "SELECT strftime('%m',`date`), strftime('%d',`date`), `value`  FROM `records` WHERE `users_id` = ? AND `date` BETWEEN datetime('now', 'start of month') AND datetime('now', 'localtime') ORDER BY `date`",
                 (self.get_user_id(user_id),))
-            #result1 = self.cursor.execute("SELECT `date` FROM `records` BETWEEN strftime('%d','now', 'start of month') AND strftime('%d','now', 'localtime')",
-                #(self.get_user_id(user_id),))
-            print(result1)
-
-
+        else:
+            result = self.cursor.execute("SELECT * FROM `records` WHERE `users_id` = ? ORDER BY `date`",
+                                         (self.get_user_id(user_id),))
         return result.fetchall()
 
     def close(self):
