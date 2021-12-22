@@ -1,15 +1,32 @@
+import broadcaster as broadcaster
 from aiogram import types
-from dispatcher import dp
+from dispatcher import dp, bot
 from bot import BotDB, ver
 from draw_table import draw_function, draw_table_month
-from config import admin_id, kanal_id, polya_id
+from config import admin_id, kanal_id, polya_id, BOT_TOKEN
 from daily_table import draw_table
 import os
 from datetime import datetime
 from markups import markup, markup_start, markup_mood, markup_podpisk, markup_statistic, markup_admin, markup_settings, markup_back
+import aioschedule
+import asyncio
+from aiogram_broadcaster import TextBroadcaster
+
+
 global markup, markup_mood
 count = 0
 global user_status
+
+
+
+
+
+
+
+
+
+
+
 
 
 # -.-.-.-.-.-.-.-.-.-.-.-.- -.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
