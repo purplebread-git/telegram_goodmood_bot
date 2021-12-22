@@ -8,9 +8,7 @@ from daily_table import draw_table
 import os
 from datetime import datetime
 from markups import markup, markup_start, markup_mood, markup_podpisk, markup_statistic, markup_admin, markup_settings, markup_back
-import aioschedule
-import asyncio
-from aiogram_broadcaster import TextBroadcaster
+
 
 
 global markup, markup_mood

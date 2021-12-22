@@ -1,4 +1,4 @@
-from typing import Optional, Any
+
 
 from PIL import Image, ImageDraw
 
