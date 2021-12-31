@@ -22,30 +22,27 @@ from PIL import Image, ImageDraw
 
 def draw_function(form_type, mood, id):
     global new_img
-    record_mood = []
-    record_day = []
     if form_type == 'week':
         d = [[], [], [], [], [], [], []]
         x = [[161.9735], [285.9206], [409.8677], [533.8148], [657.7619], [781.709], [905.6561]]
         for i in range(0, len(mood)):
 
-            rec = mood[i]
-            if int(rec[4]) == 1:
-                d[0].append(int(rec[2]))
-            if int(rec[4]) == 2:
-                d[1].append(int(rec[2]))
-            if int(rec[4]) == 3:
-                d[2].append(int(rec[2]))
-            if int(rec[4]) == 4:
-                d[3].append(int(rec[2]))
-            if int(rec[4]) == 5:
-                d[4].append(int(rec[2]))
-            if int(rec[4]) == 6:
-                d[5].append(int(rec[2]))
-            if int(rec[4]) == 0:
-                d[6].append(int(rec[2]))
-            record_mood.append(str(rec[2]))
-            record_day.append(str(rec[4]))
+            week_day = mood[i]['date'].weekday()
+            if int(week_day) == 1:
+                d[0].append(int(mood[i]['value']))
+            if int(week_day) == 2:
+                d[1].append(int(mood[i]['value']))
+            if int(week_day) == 3:
+                d[2].append(int(mood[i]['value']))
+            if int(week_day) == 4:
+                d[3].append(int(mood[i]['value']))
+            if int(week_day) == 5:
+                d[4].append(int(mood[i]['value']))
+            if int(week_day) == 6:
+                d[5].append(int(mood[i]['value']))
+            if int(week_day) == 0:
+                d[6].append(int(mood[i]['value']))
+
         print(d)
         if (d[0] == [] and d[1] == [] and d[2] == [] and d[3] == [] and d[4] == [] and d[5] == [] and d[6] != []) or \
             (d[0] == [] and d[1] == [] and d[2] == [] and d[3] == [] and d[4] == [] and d[5] != [] and d[6] == []) or \
@@ -94,34 +91,44 @@ def draw_function(form_type, mood, id):
 def draw_table_month(form_type, mood, id):
         global new_img
         if form_type == "month":
-            mood = list(mood)
-
             d = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
             x = []
             x_1 = 161.9735
-            for i in range(0, len(mood)):
-                rec = list(mood[i])
-                mood[i] = rec
-                if rec[1] == '01':
-                    rec[1] = '1'
-                if rec[1] == '02':
-                    rec[1] = '2'
-                if rec[1] == '03':
-                    rec[1] = '3'
-                if rec[1] == '04':
-                    rec[1] = '4'
-                if rec[1] == '05':
-                    rec[1] = '5'
-                if rec[1] == '06':
-                    rec[1] = '6'
-                if rec[1] == '07':
-                    rec[1] = '7'
-                if rec[1] == '08':
-                    rec[1] = '8'
-                if rec[1] == '09':
-                    rec[1] = '9'
 
-                d[int(rec[1])-1].append(rec[2])
+
+            for i in range(0, len(mood)):
+                rec = mood[i]
+                if rec['date'].strftime('%d') == '01':
+                    d[0].append(int(rec['value']))
+                elif rec['date'].strftime('%d') == '02':
+                    d[1].append(int(rec['value']))
+                elif rec['date'].strftime('%d') == '03':
+                    d[2].append(int(rec['value']))
+                elif rec['date'].strftime('%d') == '04':
+                    d[3].append(int(rec['value']))
+                elif rec['date'].strftime('%d') == '05':
+                    d[4].append(int(rec['value']))
+                elif rec['date'].strftime('%d') == '06':
+                    d[5].append(int(rec['value']))
+                elif rec['date'].strftime('%d') == '07':
+                    d[6].append(int(rec['value']))
+                elif rec['date'].strftime('%d') == '08':
+                    d[7].append(int(rec['value']))
+                elif rec['date'].strftime('%d') == '09':
+                    d[8].append(int(rec['value']))
+                else:
+                    a =int(rec['value'])
+                    d[int(rec['date'].strftime('%d'))-1].append([a])
+            for l in range(9, len(d)):
+
+                if len(d[l]) == 1:
+                    m = d[l][0]
+                    d[l] = m
+
+
+
+
+
             for j in range(0, len(d)):
                 x.append(round(x_1+j*24.7895, 4))
                 summ = 0
@@ -129,14 +136,17 @@ def draw_table_month(form_type, mood, id):
                 if len(d[j]) > 1:
                     d_2 = d[j]
                     for i in range(0, len(d_2)):
-                        summ = float(summ + int(d_2[0]))
+                        summ = float(summ + int(d_2[0][0]))
                         d[j].pop(0)
                         a = a + 1
                     ravn = summ / a
-                    d[j] = [(round((ravn), 2))]
+                    d[j] = []
+                    d[j].append(round((ravn), 2))
+
+
             #print(mood)
             #print(d)
-
+            print('d - ', d)
             a = []
             b = []
             #print(x)

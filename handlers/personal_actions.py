@@ -21,9 +21,11 @@ global user_status
 
 
 
-
-
-
+@dp.message_handler(commands="test")
+async def test(message: types.Message):
+    print('user_id - ', message.from_user.id)
+    id = BotDB.get_user_id(message.from_user.id)
+    print(id)
 
 
 
@@ -61,8 +63,13 @@ async def check_podpisk(call: types.CallbackQuery):
 
 @dp.message_handler(commands="start")
 async def start(message: types.Message):
-    if not BotDB.user_exists(message.from_user.id):
+    print(message.from_user.id)
+    u_e = BotDB.user_exists(message.from_user.id)
+    if u_e == tuple():
+        a = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(a)
         BotDB.add_user(message.from_user.id)
+        print('user добавлен')
     await message.bot.delete_message(message.from_user.id, int(message['message_id']))
     await message.bot.send_message(message.from_user.id, "Добро пожаловать!")
     msg_kan = 'Для использования бота, пожалуйста, подпишитесь на канал' + '\n\n' + 'https://t.me/goodmood_kanal'
@@ -90,7 +97,7 @@ async def echo_message(message: types.Message):
             await message.bot.delete_message(message.from_user.id, int(message['message_id']))
             count = 1
         elif count == 1:
-            if msg == " 😀 ":
+            if msg == " 😀 " or msg == '5':
                 mood = 5
                 BotDB.add_record(message.from_user.id, mood)
                 await message.bot.delete_message(message.from_user.id, int(message['message_id']))
@@ -98,7 +105,7 @@ async def echo_message(message: types.Message):
                                                "✅ Запись о Вашем <b>настроении</b> успешно внесена!",
                                                reply_markup=markup)
                 count = 0
-            elif msg == " 🙂 ":
+            elif msg == " 🙂 " or msg == '4':
                 mood = 4
                 BotDB.add_record(message.from_user.id, mood)
                 await message.bot.delete_message(message.from_user.id, int(message['message_id']))
@@ -106,7 +113,7 @@ async def echo_message(message: types.Message):
                                                "✅ Запись о Вашем <b>настроении</b> успешно внесена!",
                                                reply_markup=markup)
                 count = 0
-            elif msg == " 😕 ":
+            elif msg == " 😕 " or msg == '3':
                 mood = 3
                 BotDB.add_record(message.from_user.id, mood)
                 await message.bot.delete_message(message.from_user.id, int(message['message_id']))
@@ -114,7 +121,7 @@ async def echo_message(message: types.Message):
                                                "✅ Запись о Вашем <b>настроении</b> успешно внесена!",
                                                reply_markup=markup)
                 count = 0
-            elif msg == " 😔 ":
+            elif msg == " 😔 " or msg == '2':
                 mood = 2
                 BotDB.add_record(message.from_user.id, mood)
                 await message.bot.delete_message(message.from_user.id, int(message['message_id']))
@@ -122,7 +129,7 @@ async def echo_message(message: types.Message):
                                                "✅ Запись о Вашем <b>настроении</b> успешно внесена!",
                                                reply_markup=markup)
                 count = 0
-            elif msg == " 😭 ":
+            elif msg == " 😭 " or msg == '1':
                 mood = 1
                 BotDB.add_record(message.from_user.id, mood)
                 await message.bot.delete_message(message.from_user.id, int(message['message_id']))
@@ -236,26 +243,27 @@ async def echo_message(message: types.Message):
                 await message.bot.delete_message(message.from_user.id, int(message['message_id'])-1)
                 count = 0
             else:
-                try:
+                #try:
                     if int(msg) >= 1 and int(msg) <= 10:
                         id_table = BotDB.get_user_id(message.from_user.id)
+                        print('id_table - ', id_table)
                         BotDB.update_daily_count(id_table, msg)
                         records_week = BotDB.get_records(message.from_user.id, 'week')
+                        print('records_week - ',records_week)
                         ready_table = draw_table(records_week, msg)
                         print(ready_table)
-                        #draw_table()
 
                         await message.bot.send_message(message.from_user.id, "Отлично! Теперь ваша ежедневная задача отмечать свое настроение <b>"+str(int(msg))+"</b> в день",
                                                   reply_markup=markup)
-                        await message.bot.send_message(message.from_user.id,str(ready_table) ,reply_markup=markup)
+                        await message.bot.send_message(message.from_user.id, str(ready_table), reply_markup=markup)
                         count = 0
 
                     else:
                         await message.bot.send_message(message.from_user.id,
                                                        "1 Введите корректное значение - число от 1 до 10",
                                                        reply_markup=markup_back)
-                except:
-                    await message.bot.send_message(message.from_user.id, "2 Введите корректное значение - число от 1 до 10", reply_markup=markup_back)
+                #except:
+                    #await message.bot.send_message(message.from_user.id, "2 Введите корректное значение - число от 1 до 10", reply_markup=markup_back)
         elif msg == "Отправить всем сообщение":
             if count == 5:
                 count_text = "Введи сообщение:"
@@ -283,7 +291,7 @@ async def echo_message(message: types.Message):
         elif msg == "Кол-во пользователей":
             if count == 5:
                 count_users = BotDB.get_count()
-                count_text = "Количество пользователей - " + str(count_users[0])
+                count_text = "Количество пользователей - " + str(count_users['count(*)'])
                 await message.bot.send_message(message.from_user.id, count_text, reply_markup=markup_admin)
                 count = 5
             else:

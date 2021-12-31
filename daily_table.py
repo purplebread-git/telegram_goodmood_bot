@@ -1,8 +1,8 @@
 from datetime import datetime
 import datetime
 
-c = [[1, 2, 3, 4, 5, 5], [4, 5, 3], [5], [], [], [], [1, 3]]
-n = 5
+
+
 mass_week_days = [[' <b>Понедельник</b> - '], [' <b>Вторник</b> - '], [' <b>Среда</b> - '], [' <b>Четверг</b> - '], [' <b>Пятница</b> - '], [' <b>Суббота</b> - '], [' <b>Воскресенье</b> - ']]
 
 # time = 2021-12-17
@@ -11,25 +11,28 @@ mass_week_days = [[' <b>Понедельник</b> - '], [' <b>Вторник</b
 
 def draw_table(week_records, count):
     week_mood = [[], [], [], [], [], [], []]
+    print(week_records)
+    print('ПРивет')
     for i in range(0, len(week_records)):
 
-        rec = week_records[i]
-        if int(rec[4]) == 1:
-            week_mood[0].append(int(rec[2]))
-        if int(rec[4]) == 2:
-            week_mood[1].append(int(rec[2]))
-        if int(rec[4]) == 3:
-            week_mood[2].append(int(rec[2]))
-        if int(rec[4]) == 4:
-            week_mood[3].append(int(rec[2]))
-        if int(rec[4]) == 5:
-            week_mood[4].append(int(rec[2]))
-        if int(rec[4]) == 6:
-            week_mood[5].append(int(rec[2]))
-        if int(rec[4]) == 0:
-            week_mood[6].append(int(rec[2]))
+        print('value - ', week_records[i])
+        week_day = week_records[i]['date'].weekday()
+        print('week_day - ')
+        if int(week_day) == 1:
+            week_mood[0].append(int(week_records[i]['value']))
+        if int(week_day) == 2:
+            week_mood[1].append(int(week_records[i]['value']))
+        if int(week_day) == 3:
+            week_mood[2].append(int(week_records[i]['value']))
+        if int(week_day) == 4:
+            week_mood[3].append(int(week_records[i]['value']))
+        if int(week_day) == 5:
+            week_mood[4].append(int(week_records[i]['value']))
+        if int(week_day) == 6:
+            week_mood[5].append(int(week_records[i]['value']))
+        if int(week_day) == 0:
+            week_mood[6].append(int(week_records[i]['value']))
 
-    print(week_mood)
 
 
 

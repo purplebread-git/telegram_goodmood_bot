@@ -2,3 +2,5 @@ aiogram
 aioschedule
 asyncio
 PIL
+mysql-connector-python
+datetime
